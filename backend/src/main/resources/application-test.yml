@@ -1,0 +1,18 @@
+# 테스트 프로필. DB가 필요한 테스트에 @ActiveProfiles("test")로 붙인다.
+# 3주차 동시성 테스트(NFR-01)부터 로컬 PostgreSQL의 테스트용 DB를 쓴다.
+# 1주차 테스트(@WebMvcTest, ArchUnit)는 DB 없이 돈다.
+spring:
+  config:
+    import:
+      - optional:file:../.env[.properties]
+      - optional:file:.env[.properties]
+  datasource:
+    url: ${TEST_DB_URL}
+    username: ${TEST_DB_USERNAME}
+    password: ${TEST_DB_PASSWORD}
+  flyway:
+    clean-disabled: false # 테스트 DB는 매번 비우고 다시 만들 수 있게 한다
+
+logging:
+  level:
+    org.hibernate.SQL: warn
