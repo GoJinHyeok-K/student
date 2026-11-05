@@ -41,7 +41,7 @@ class CourseControllerTest {
     given(courseQueryService.search(eq("jpa"), eq("개발"), any(Pageable.class)))
         .willReturn(
             new PageResponse<>(
-                List.of(new CourseSummaryResponse(7L, "JPA 기초", "개발", CourseStatus.OPEN)),
+                List.of(new CourseSummaryResponse(7L, "JPA 기초", "개발", CourseStatus.OPEN, 2)),
                 1,
                 5,
                 6));
@@ -57,7 +57,7 @@ class CourseControllerTest {
         .bodyJson()
         .isLenientlyEqualTo(
             """
-            {"content":[{"id":7,"title":"JPA 기초","category":"개발","status":"OPEN"}],
+            {"content":[{"id":7,"title":"JPA 기초","category":"개발","status":"OPEN","sessionCount":2}],
              "page":1,"size":5,"totalElements":6}
             """);
 

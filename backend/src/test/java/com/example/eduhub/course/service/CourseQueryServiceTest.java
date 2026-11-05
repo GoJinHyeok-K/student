@@ -20,6 +20,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 
 // 로컬 PostgreSQL 테스트 DB에서 Service의 DTO 변환과 예외를 확인한다 (NFR-05 커버리지).
@@ -34,21 +35,39 @@ class CourseQueryServiceTest {
   @Autowired private EntityManager em;
 
   @Test
-  @DisplayName("목록 결과를 PageResponse<CourseSummaryResponse>로 바꾼다")
-  void searchReturnsPageResponse() {
-    Course course = courseRepository.save(Course.create("서비스 테스트 과정 QX7", "개발", null));
+  @DisplayName("목록 결과를 PageResponse<CourseSummaryResponse>로 바꾸고 과정별 회차 수를 담는다")
+  void searchReturnsPageResponseWithSessionCounts() {
+    Course withSessions = Course.create("서비스 테스트 과정 QX7 A", "개발", null);
+    withSessions.addSession(LocalDate.of(2026, 12, 1), "온라인", 10);
+    withSessions.addSession(LocalDate.of(2026, 12, 8), "온라인", 10);
+    Long withSessionsId = courseRepository.save(withSessions).getId();
+    Long noSessionsId =
+        courseRepository.save(Course.create("서비스 테스트 과정 QX7 B", "개발", null)).getId();
     em.flush();
     em.clear();
 
     PageResponse<CourseSummaryResponse> result =
-        courseQueryService.search("qx7", "개발", PageRequest.of(0, 10));
+        courseQueryService.search("qx7", "개발", PageRequest.of(0, 10, Sort.by("id")));
 
     assertThat(result.content())
         .containsExactly(
-            new CourseSummaryResponse(course.getId(), "서비스 테스트 과정 QX7", "개발", CourseStatus.OPEN));
+            new CourseSummaryResponse(
+                withSessionsId, "서비스 테스트 과정 QX7 A", "개발", CourseStatus.OPEN, 2),
+            new CourseSummaryResponse(
+                noSessionsId, "서비스 테스트 과정 QX7 B", "개발", CourseStatus.OPEN, 0));
     assertThat(result.page()).isZero();
     assertThat(result.size()).isEqualTo(10);
-    assertThat(result.totalElements()).isEqualTo(1);
+    assertThat(result.totalElements()).isEqualTo(2);
+  }
+
+  @Test
+  @DisplayName("검색 결과가 없으면 빈 목록을 돌려준다")
+  void searchReturnsEmptyPage() {
+    PageResponse<CourseSummaryResponse> result =
+        courseQueryService.search("존재하지않는검색어ZZ9", null, PageRequest.of(0, 10));
+
+    assertThat(result.content()).isEmpty();
+    assertThat(result.totalElements()).isZero();
   }
 
   @Test

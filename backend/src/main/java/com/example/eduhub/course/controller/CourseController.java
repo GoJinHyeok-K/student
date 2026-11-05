@@ -33,7 +33,8 @@ public class CourseController {
     this.courseQueryService = courseQueryService;
   }
 
-  @Operation(summary = "과정 목록 조회 (제목 검색, 분류 필터, 페이지)")
+  // operationId는 생성 클라이언트의 메서드 이름이 된다 (courseApi.getCourses)
+  @Operation(operationId = "getCourses", summary = "과정 목록 조회 (제목 검색, 분류 필터, 페이지)")
   @GetMapping
   public PageResponse<CourseSummaryResponse> search(
       @Parameter(description = "제목 검색어 (부분 일치, 대소문자 무시)") @RequestParam(required = false)
@@ -44,7 +45,7 @@ public class CourseController {
     return courseQueryService.search(keyword, category, pageable);
   }
 
-  @Operation(summary = "과정 상세 조회 (회차 목록 포함)")
+  @Operation(operationId = "getCourse", summary = "과정 상세 조회 (회차 목록 포함)")
   @ApiResponse(responseCode = "200", description = "조회 성공")
   @ApiResponse(
       responseCode = "404",
