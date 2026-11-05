@@ -16,4 +16,4 @@ SELECT 'CREATE DATABASE eduhub_test OWNER eduhub'
 WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'eduhub_test')
 \gexec
 
-\echo 완료: .env 의 DB_PASSWORD, TEST_DB_PASSWORD 에 같은 비밀번호를 넣는다.
+\echo 완료: .env 의 POSTGRES_PASSWORD, TEST_DB_PASSWORD 에 같은 비밀번호를 넣는다.

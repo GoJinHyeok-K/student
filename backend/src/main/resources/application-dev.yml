@@ -4,10 +4,11 @@ spring:
     import:
       - optional:file:../.env[.properties] # backend 폴더에서 실행할 때
       - optional:file:.env[.properties] # 저장소 루트에서 실행할 때
+  # NFR-06: 로컬 PostgreSQL 또는 docker-compose의 postgres:16 (둘 다 5432, D-05)
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
   jpa:
     properties:
       hibernate:

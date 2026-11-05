@@ -1,6 +1,6 @@
 # 테스트 프로필. DB가 필요한 테스트에 @ActiveProfiles("test")로 붙인다.
-# 3주차 동시성 테스트(NFR-01)부터 로컬 PostgreSQL의 테스트용 DB를 쓴다.
-# 1주차 테스트(@WebMvcTest, ArchUnit)는 DB 없이 돈다.
+# 로컬 PostgreSQL의 테스트용 DB를 쓴다 (D-05). @DataJpaTest부터 이 DB가 필요하다.
+# @WebMvcTest, ArchUnit 테스트는 DB 없이 돈다.
 spring:
   config:
     import:

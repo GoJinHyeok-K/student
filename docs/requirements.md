@@ -43,3 +43,4 @@
 - D-02: 대기 인원은 정원의 50%까지 받는다 (FR-05)
 - D-03: 수료 처리는 관리자만 한다 (FR-08)
 - D-04: 인증은 자체 로그인(아이디·비밀번호) + 서버 세션 쿠키 방식, 역할은 USER/ADMIN 두 가지. 회원가입은 범위 밖이며 계정은 시드 데이터로 넣는다. 사내 SSO 도입 시 OIDC로 교체할 수 있게 인증 설정을 분리한다 (NFR-03)
+- D-05: 개발 DB 접속 정보는 `.env`의 `POSTGRES_USER`/`POSTGRES_PASSWORD`/`POSTGRES_DB`이고 `localhost:5432`에 붙는다. 로컬 PostgreSQL이나 `docker-compose.yml`의 postgres:16 중 하나를 쓴다. 테스트 DB는 Testcontainers 대신 로컬 PostgreSQL의 테스트용 DB(`TEST_DB_*`)를 쓴다 (NFR-06)

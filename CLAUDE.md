@@ -12,11 +12,13 @@
 - `frontend/`: React 프론트엔드, 아직 코드 없음 (규칙: `frontend/CLAUDE.md`)
 - `docs/requirements.md`: 요구사항(FR-xx, NFR-xx)과 결정 사항(D-xx)
 - `scripts/init-local-db.sql`: 로컬 DB 준비 스크립트
+- `docker-compose.yml`: 개발용 PostgreSQL 16
 - `.env.example`: 환경 변수 이름 목록 (실제 값은 `.env`)
 
 ## 실행 명령
 Gradle 명령은 `backend/`에서 실행한다 (PowerShell은 `.\gradlew`).
 - 로컬 DB 준비: `psql -U postgres -f scripts/init-local-db.sql` (eduhub 계정, eduhub / eduhub_test DB 생성)
+- Docker로 개발 DB 실행: 저장소 루트에서 `docker compose up -d` (로컬 PostgreSQL과 같은 5432 포트, D-05)
 - 빌드·테스트: `./gradlew test`
 - 전체 검사(포맷, 커버리지 포함): `./gradlew check`
 - 실행: `./gradlew bootRun` (기본 프로필 dev) → `http://localhost:8080/api/health`, `/swagger-ui.html`, `/api-docs`
