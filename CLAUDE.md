@@ -9,7 +9,9 @@
 
 ## 디렉터리 지도
 - `backend/`: Spring Boot API 서버 (규칙: `backend/CLAUDE.md`)
-- `frontend/`: React 프론트엔드, 아직 코드 없음 (규칙: `frontend/CLAUDE.md`)
+- `frontend/`: React 프론트엔드, npm workspaces (규칙: `frontend/CLAUDE.md`)
+  - `frontend/packages/api-client`: OpenAPI에서 생성한 Axios 클라이언트 (직접 고치지 않는다)
+  - `frontend/apps/course-mfe`: 과정 화면, 단독 실행 포트 3001
 - `docs/requirements.md`: 요구사항(FR-xx, NFR-xx)과 결정 사항(D-xx)
 - `scripts/init-local-db.sql`: 로컬 DB 준비 스크립트
 - `docker-compose.yml`: 개발용 PostgreSQL 16
@@ -22,6 +24,7 @@ Gradle 명령은 `backend/`에서 실행한다 (PowerShell은 `.\gradlew`).
 - 빌드·테스트: `./gradlew test`
 - 전체 검사(포맷, 커버리지 포함): `./gradlew check`
 - 실행: `./gradlew bootRun` (기본 프로필 dev) → `http://localhost:8080/api/health`, `/swagger-ui.html`, `/api-docs`
+- 프론트(`frontend/`에서): `npm install`, `npm run generate:api`(백엔드를 띄운 상태에서), `npm run dev` → `http://localhost:3001`, `npm test`
 
 ## 공통 규칙
 ### 기준 문서
