@@ -12,10 +12,7 @@ import jakarta.persistence.Entity;
 import org.springframework.data.repository.Repository;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * 팀 규칙과 NFR-07을 테스트로 검사한다. 아직 클래스가 없는 규칙도 통과하도록 allowEmptyShould(true)를
- * 둔다.
- */
+/** 팀 규칙과 NFR-07을 테스트로 검사한다. 아직 클래스가 없는 규칙도 통과하도록 allowEmptyShould(true)를 둔다. */
 @AnalyzeClasses(
     packages = "com.example.eduhub",
     importOptions = ImportOption.DoNotIncludeTests.class)

@@ -12,10 +12,6 @@ public class OpenApiConfig {
   @Bean
   public OpenAPI eduhubOpenApi() {
     return new OpenAPI()
-        .info(
-            new Info()
-                .title("EduHub API")
-                .description("사내 교육과정 조회 및 수강 신청 API")
-                .version("v1"));
+        .info(new Info().title("EduHub API").description("사내 교육과정 조회 및 수강 신청 API").version("v1"));
   }
 }
