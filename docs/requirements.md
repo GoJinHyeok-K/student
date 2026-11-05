@@ -46,3 +46,4 @@
 - D-05: 개발 DB 접속 정보는 `.env`의 `POSTGRES_USER`/`POSTGRES_PASSWORD`/`POSTGRES_DB`이고 `localhost:5432`에 붙는다. 로컬 PostgreSQL이나 `docker-compose.yml`의 postgres:16 중 하나를 쓴다. 테스트 DB는 Testcontainers 대신 로컬 PostgreSQL의 테스트용 DB(`TEST_DB_*`)를 쓴다 (NFR-06)
 - D-06: 과정과 회차의 상태는 `OPEN`(모집 중), `CLOSED`(종료) 두 가지다. 상태는 엔티티의 `close()` 같은 메서드로만 바꾼다 (FR-03)
 - D-07: 과정 목록은 기본 20건씩 `id` 내림차순으로 돌려주고, `CLOSED` 과정과 회차도 포함해 `status`로 구분한다. 남은 자리는 수강 신청(FR-04) 전까지 정원과 같다 (FR-01, FR-02)
+- D-08: 프론트 개발 서버(3001)는 CORS 설정 대신 Vite 프록시로 `/api` 요청을 백엔드(8080)에 넘긴다. 운영 배포 방식은 6주차 MFE 구성 때 다시 정한다. 과정 목록의 분류 선택지는 분류 API가 생기기 전까지 화면에 고정한다 (FR-01, NFR-04)
