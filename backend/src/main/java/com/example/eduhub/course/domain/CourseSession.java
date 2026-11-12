@@ -1,5 +1,6 @@
 package com.example.eduhub.course.domain;
 
+import com.example.eduhub.common.exception.ConflictException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -48,19 +49,35 @@ public class CourseSession {
   protected CourseSession() {}
 
   CourseSession(Course course, LocalDate startDate, String place, int capacity) {
-    if (capacity <= 0) {
-      throw new IllegalArgumentException("정원은 1명 이상이어야 한다: " + capacity);
-    }
     this.course = Objects.requireNonNull(course, "course");
-    this.startDate = Objects.requireNonNull(startDate, "startDate");
-    this.place = Objects.requireNonNull(place, "place");
-    this.capacity = capacity;
+    apply(startDate, place, capacity);
     this.status = CourseSessionStatus.OPEN;
   }
 
-  /** 회차를 종료한다 (FR-03). */
+  /**
+   * 시작일·장소·정원을 바꾼다 (FR-03). 종료된 회차는 바꿀 수 없다 (D-10).
+   *
+   * <p>수강 신청(FR-04)이 생기면 확정 인원보다 정원을 줄이지 못하게 검사를 더한다.
+   */
+  public void update(LocalDate startDate, String place, int capacity) {
+    if (status == CourseSessionStatus.CLOSED) {
+      throw new ConflictException("종료된 회차는 바꿀 수 없습니다: id=" + id);
+    }
+    apply(startDate, place, capacity);
+  }
+
+  /** 회차를 종료한다 (FR-03). 이미 종료됐으면 아무것도 하지 않는다. */
   public void close() {
     this.status = CourseSessionStatus.CLOSED;
+  }
+
+  private void apply(LocalDate startDate, String place, int capacity) {
+    if (capacity <= 0) {
+      throw new IllegalArgumentException("정원은 1명 이상이어야 한다: " + capacity);
+    }
+    this.startDate = Objects.requireNonNull(startDate, "startDate");
+    this.place = Objects.requireNonNull(place, "place");
+    this.capacity = capacity;
   }
 
   public Long getId() {
