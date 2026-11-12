@@ -1,23 +1,34 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CourseDetailResponse } from '@eduhub/api-client';
 import { courseApi } from '../api/courseApi';
 
-/** 과정 상세와 회차 목록(FR-02)을 불러오는 훅. 화면은 이 훅의 data·loading·error·notFound만 쓴다. */
+/**
+ * 과정 상세와 회차 목록(FR-02)을 불러오는 훅. 화면은 이 훅의 data·loading·error·notFound만 쓴다.
+ *
+ * reload는 관리 화면(FR-03)에서 저장한 뒤 다시 불러올 때 쓴다. 다시 불러오는 동안에는 이전 data를 그대로 보여 준다.
+ */
 export function useCourse(id: number) {
   const [data, setData] = useState<CourseDetailResponse>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<unknown>();
+  const [version, setVersion] = useState(0);
+  const loadedId = useRef<number>();
 
   useEffect(() => {
     let ignore = false; // 다른 과정으로 빠르게 옮길 때, 늦게 도착한 이전 응답은 버린다
-    setLoading(true);
+    const sameCourse = loadedId.current === id;
+    if (!sameCourse) {
+      setLoading(true);
+      setData(undefined);
+    }
     setError(undefined);
-    setData(undefined);
 
     courseApi
       .getCourse(id)
       .then((response) => {
-        if (!ignore) setData(response.data);
+        if (ignore) return;
+        loadedId.current = id;
+        setData(response.data);
       })
       .catch((e: unknown) => {
         if (!ignore) setError(e);
@@ -29,10 +40,12 @@ export function useCourse(id: number) {
     return () => {
       ignore = true;
     };
-  }, [id]);
+  }, [id, version]);
+
+  const reload = useCallback(() => setVersion((v) => v + 1), []);
 
   // 백엔드는 없는 과정에 404 ProblemDetail을 돌려준다
   const notFound = (error as { response?: { status?: number } } | undefined)?.response?.status === 404;
 
-  return { data, loading, error, notFound };
+  return { data, loading, error, notFound, reload };
 }
