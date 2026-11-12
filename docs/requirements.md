@@ -56,3 +56,7 @@
   - Windows에서는 Bash 규칙이 PowerShell 도구에 적용되지 않으므로 같은 규칙을 `PowerShell(...)`로도 둔다 (Gradle은 `.\gradlew`)
   - 개인 설정(기본 모드, 로컬 서버 명령)은 `.claude/settings.local.json`, 워크트리(`.claude/worktrees/`)와 개인 경로가 들어가는 `.claude/launch.json`은 커밋하지 않는다
   - 회사 공통 금지(bypass 모드 금지 등)는 관리 설정 몫이며 이 저장소에서 정하지 않는다 (NFR-03)
+- D-12: 동시성 테스트(NFR-01)도 Testcontainers 대신 D-05의 로컬 PostgreSQL 테스트 DB(`TEST_DB_*`)에서 돌린다. 실제 PostgreSQL이라 행 잠금·격리 수준 동작은 같고, 개발 PC에 Docker가 없어도 된다. 4회차 자료의 "Docker Desktop + Testcontainers" 준비는 이 저장소에서는 따르지 않는다.
+  - 동시성 테스트는 여러 스레드가 같은 데이터를 봐야 하므로 `@DataJpaTest`의 테스트 트랜잭션 롤백을 쓸 수 없다. 데이터를 커밋해서 준비하고, 테스트가 끝나면 직접 지운다 (다른 테스트와 겹치지 않게 테스트 전용 제목·id로 구분)
+  - 커넥션 풀이 동시 요청 수보다 작으면 대기만 길어지고 경합이 약해지므로, 테스트는 풀 크기와 스레드 수를 함께 정한다
+  - CI를 붙일 때는 CI의 PostgreSQL 서비스 컨테이너를 테스트 DB로 쓴다. 그때 Testcontainers로 바꿀지 다시 정한다 (NFR-01, NFR-05, NFR-06)
