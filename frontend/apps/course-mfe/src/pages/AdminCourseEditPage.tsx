@@ -3,9 +3,8 @@ import {
   Alert,
   Box,
   Button,
-  Chip,
-  CircularProgress,
   Paper,
+  Skeleton,
   Stack,
   Table,
   TableBody,
@@ -19,7 +18,8 @@ import type { SessionResponse } from '@eduhub/api-client';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { CourseFormDialog } from '../components/CourseFormDialog';
 import { SessionFormDialog } from '../components/SessionFormDialog';
-import { categoryColor, formatDate, STATUS } from '../courseLabels';
+import { CategoryBackdrop, DateBlock, EmptyState, Icon, ICONS, SectionHeader, StatusChip } from '../components/ui';
+import { formatDate } from '../courseLabels';
 import { useCourse } from '../hooks/useCourse';
 import { useCourseAdmin } from '../hooks/useCourseAdmin';
 
@@ -35,12 +35,6 @@ type DialogState =
   | { kind: 'addSession' }
   | { kind: 'editSession'; session: SessionResponse }
   | { kind: 'closeSession'; session: SessionResponse };
-
-function StatusChip({ status }: { status?: string }) {
-  const s = status ? STATUS[status] : undefined;
-  if (!s) return null;
-  return <Chip label={s.label} size="small" color={s.color} variant={s.color === 'success' ? 'filled' : 'outlined'} />;
-}
 
 /**
  * 과정 관리 화면 (FR-03). 과정 수정·종료와 회차 추가·수정·종료를 한 화면에서 한다.
@@ -67,8 +61,13 @@ export function AdminCourseEditPage({ courseId, onBack }: AdminCourseEditPagePro
   };
 
   const backButton = (
-    <Button onClick={onBack} sx={{ mb: 2, ml: -1 }}>
-      ← 관리 목록으로
+    <Button
+      onClick={onBack}
+      startIcon={<Icon d={ICONS.back} />}
+      color="inherit"
+      sx={{ mb: 2, ml: -1, color: 'text.secondary', '&:hover': { color: 'text.primary', bgcolor: 'grey.100' } }}
+    >
+      관리 목록으로
     </Button>
   );
 
@@ -76,9 +75,8 @@ export function AdminCourseEditPage({ courseId, onBack }: AdminCourseEditPagePro
     return (
       <>
         {backButton}
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-          <CircularProgress size={32} />
-        </Box>
+        <Skeleton variant="rounded" height={180} sx={{ borderRadius: 5, mb: 4 }} animation="wave" />
+        <Skeleton variant="rounded" height={220} sx={{ borderRadius: 4 }} animation="wave" />
       </>
     );
   }
@@ -87,7 +85,7 @@ export function AdminCourseEditPage({ courseId, onBack }: AdminCourseEditPagePro
     return (
       <>
         {backButton}
-        <Alert severity={notFound ? 'warning' : 'error'}>
+        <Alert severity={notFound ? 'warning' : 'error'} sx={{ borderRadius: 3 }}>
           {notFound ? '과정을 찾을 수 없습니다.' : '과정 정보를 불러오지 못했습니다.'}
         </Alert>
       </>
@@ -96,86 +94,109 @@ export function AdminCourseEditPage({ courseId, onBack }: AdminCourseEditPagePro
 
   const courseOpen = data.status === 'OPEN';
   const sessions = data.sessions ?? [];
-  const color = categoryColor(data.category);
 
   return (
     <>
       {backButton}
-      <Paper sx={{ p: { xs: 2.5, md: 3 }, mb: 3 }}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ justifyContent: 'space-between' }}>
-          <Box>
-            <Stack direction="row" spacing={1} sx={{ mb: 1.5 }}>
-              <Chip label={data.category} size="small" sx={{ bgcolor: color.bg, color: color.fg }} />
-              <StatusChip status={data.status} />
+      <CategoryBackdrop
+        category={data.category}
+        sx={{ borderRadius: 5, px: { xs: 3, md: 4 }, py: { xs: 3, md: 3.5 }, mb: 4, filter: courseOpen ? undefined : 'grayscale(0.8)' }}
+      >
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{ justifyContent: 'space-between' }}>
+          <Box sx={{ minWidth: 0 }}>
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 1.5 }}>
+              <Typography sx={{ fontSize: 14, fontWeight: 700, opacity: 0.9 }}>{data.category}</Typography>
+              <Box sx={{ width: 3, height: 3, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.6)' }} />
+              <StatusChip status={data.status} onDark />
             </Stack>
-            <Typography variant="h5" component="h2" fontWeight={700}>
+            <Typography variant="h4" component="h2" sx={{ fontSize: { xs: 26, md: 32 } }}>
               {data.title}
             </Typography>
-            <Typography color={data.description ? 'text.primary' : 'text.secondary'} sx={{ mt: 1.5, whiteSpace: 'pre-line' }}>
+            <Typography sx={{ mt: 1, whiteSpace: 'pre-line', color: 'rgba(255,255,255,0.85)', maxWidth: 680 }}>
               {data.description || '과정 소개가 없습니다.'}
             </Typography>
           </Box>
           {courseOpen && (
             <Stack direction="row" spacing={1} sx={{ alignItems: 'flex-start', flexShrink: 0 }}>
-              <Button variant="outlined" onClick={() => open({ kind: 'editCourse' })}>
+              <Button
+                variant="contained"
+                startIcon={<Icon d={ICONS.edit} />}
+                onClick={() => open({ kind: 'editCourse' })}
+                sx={{ bgcolor: '#fff', color: 'grey.900', boxShadow: 'none', '&:hover': { bgcolor: 'grey.100' } }}
+              >
                 과정 수정
               </Button>
-              <Button variant="outlined" color="error" onClick={() => open({ kind: 'closeCourse' })}>
+              <Button
+                variant="outlined"
+                startIcon={<Icon d={ICONS.stop} />}
+                onClick={() => open({ kind: 'closeCourse' })}
+                sx={{ color: '#fff', borderColor: 'rgba(255,255,255,0.5)', '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.1)' } }}
+              >
                 과정 종료
               </Button>
             </Stack>
           )}
         </Stack>
-        {!courseOpen && (
-          <Alert severity="info" sx={{ mt: 2 }}>
-            종료된 과정입니다. 과정과 회차를 더 바꿀 수 없습니다.
-          </Alert>
-        )}
-      </Paper>
+      </CategoryBackdrop>
 
-      <Paper sx={{ overflow: 'hidden' }}>
-        <Stack direction="row" sx={{ px: 2, py: 1.5, alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography variant="subtitle1" component="h3" fontWeight={700}>
-            회차 일정{' '}
-            <Typography component="span" color="text.secondary">
-              {sessions.length}
-            </Typography>
-          </Typography>
-          {courseOpen && (
-            <Button variant="contained" size="small" onClick={() => open({ kind: 'addSession' })}>
+      {!courseOpen && (
+        <Alert severity="info" icon={<Icon d={ICONS.lock} />} sx={{ mb: 3, borderRadius: 3 }}>
+          종료된 과정입니다. 과정과 회차를 더 바꿀 수 없습니다.
+        </Alert>
+      )}
+
+      <SectionHeader
+        title="회차 일정"
+        count={sessions.length}
+        action={
+          courseOpen && (
+            <Button variant="contained" startIcon={<Icon d={ICONS.plus} />} onClick={() => open({ kind: 'addSession' })}>
               회차 추가
             </Button>
-          )}
-        </Stack>
-        <TableContainer>
-          <Table aria-label="회차 일정">
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ width: 160 }}>시작일</TableCell>
-                <TableCell>장소</TableCell>
-                <TableCell sx={{ width: 90 }} align="right">
-                  정원
-                </TableCell>
-                <TableCell sx={{ width: 110 }}>상태</TableCell>
-                <TableCell sx={{ width: 170 }} align="right">
-                  관리
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {sessions.map((s) => (
-                <TableRow key={s.id} sx={{ '&:last-child td': { borderBottom: 0 } }}>
-                  <TableCell>{formatDate(s.startDate)}</TableCell>
-                  <TableCell>{s.place}</TableCell>
+          )
+        }
+      />
+      <TableContainer component={Paper} sx={{ borderRadius: 4 }}>
+        <Table aria-label="회차 일정">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ width: 96 }}>일정</TableCell>
+              <TableCell>장소</TableCell>
+              <TableCell sx={{ width: 90 }} align="right">
+                정원
+              </TableCell>
+              <TableCell sx={{ width: 110 }}>상태</TableCell>
+              <TableCell sx={{ width: 190 }} align="right">
+                관리
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {sessions.map((s) => {
+              const sessionOpen = s.status === 'OPEN';
+              return (
+                <TableRow key={s.id} hover sx={{ '&:last-child td': { borderBottom: 0 } }}>
+                  <TableCell>
+                    <DateBlock date={s.startDate} muted={!sessionOpen} />
+                  </TableCell>
+                  <TableCell>
+                    <Typography fontWeight={600} color={sessionOpen ? 'text.primary' : 'text.secondary'}>
+                      {s.place}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {formatDate(s.startDate)}
+                    </Typography>
+                  </TableCell>
                   <TableCell align="right">{s.capacity}명</TableCell>
                   <TableCell>
                     <StatusChip status={s.status} />
                   </TableCell>
                   <TableCell align="right">
-                    {s.status === 'OPEN' && (
+                    {sessionOpen && (
                       <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'flex-end' }}>
                         <Button
                           size="small"
+                          variant="outlined"
                           aria-label={`${formatDate(s.startDate)} 회차 수정`}
                           onClick={() => open({ kind: 'editSession', session: s })}
                         >
@@ -193,23 +214,21 @@ export function AdminCourseEditPage({ courseId, onBack }: AdminCourseEditPagePro
                     )}
                   </TableCell>
                 </TableRow>
-              ))}
-              {sessions.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5} align="center" sx={{ py: 6, borderBottom: 0 }}>
-                    <Typography fontWeight={600}>등록된 회차가 없습니다</Typography>
-                    {courseOpen && (
-                      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                        회차 추가 버튼으로 일정을 등록하세요.
-                      </Typography>
-                    )}
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
+              );
+            })}
+            {sessions.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} sx={{ borderBottom: 0 }}>
+                  <EmptyState
+                    title="등록된 회차가 없습니다"
+                    description={courseOpen ? '회차 추가 버튼으로 일정을 등록하세요.' : undefined}
+                  />
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
       <CourseFormDialog
         open={dialog?.kind === 'editCourse'}

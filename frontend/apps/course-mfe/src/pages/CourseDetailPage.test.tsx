@@ -32,14 +32,24 @@ test('과정 정보와 회차 일정·정원·남은 자리를 보여 준다', (
   expect(screen.getByRole('heading', { name: 'JPA 기초' })).toBeInTheDocument();
   expect(screen.getByText('엔티티 매핑과 연관관계')).toBeInTheDocument();
 
-  const rows = within(screen.getByRole('table', { name: '회차 일정' })).getAllByRole('row');
-  expect(rows).toHaveLength(3); // 머리글 + 회차 2개
-  expect(rows[1]).toHaveTextContent('2026.12.01 (화)');
-  expect(rows[1]).toHaveTextContent('본사 3층');
-  expect(rows[1]).toHaveTextContent('20명');
-  expect(rows[1]).toHaveTextContent('20석');
-  expect(rows[1]).toHaveTextContent('모집 중');
-  expect(rows[2]).toHaveTextContent('종료');
+  const items = within(screen.getByRole('list', { name: '회차 일정' })).getAllByRole('listitem');
+  expect(items).toHaveLength(2);
+  expect(items[0]).toHaveTextContent('2026.12.01 (화)');
+  expect(items[0]).toHaveTextContent('본사 3층');
+  expect(items[0]).toHaveTextContent('정원 20명');
+  expect(items[0]).toHaveTextContent('20석');
+  expect(items[0]).toHaveTextContent('모집 중');
+  expect(items[1]).toHaveTextContent('종료');
+});
+
+test('머리말에 회차 요약(모집 중 회차 수, 남은 자리 합계)을 보여 준다', () => {
+  mockUseCourse.mockReturnValue(loaded());
+
+  render(<CourseDetailPage courseId={1} onBack={() => {}} />);
+
+  // 회차 2개 중 모집 중 1개, 남은 자리는 모집 중 회차만 더한다
+  expect(screen.getByText('모집 중인 회차').nextSibling).toHaveTextContent('1회');
+  expect(screen.getByText('남은 자리 합계').nextSibling).toHaveTextContent('20석');
 });
 
 test('모집 중인데 남은 자리가 없으면 마감으로 보여 준다', () => {
