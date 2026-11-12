@@ -49,3 +49,10 @@
 - D-08: 프론트 개발 서버(3001)는 CORS 설정 대신 Vite 프록시로 `/api` 요청을 백엔드(8080)에 넘긴다. 운영 배포 방식은 6주차 MFE 구성 때 다시 정한다. 과정 목록의 분류 선택지는 분류 API가 생기기 전까지 화면에 고정한다 (FR-01, NFR-04)
 - D-09: course-mfe 안의 화면 전환(목록 → 상세)은 라우터 없이 선택한 과정 id 상태로 한다. 목록은 숨기기만 하므로 상세에서 돌아와도 검색어·분류·페이지가 유지된다. URL 라우팅은 6주차 shell 구성 때 shell 라우터와 함께 정한다. 상세의 회차는 시작일 순으로 보여 주고, 모집 중인데 남은 자리가 0이면 '마감'으로 표시한다 (FR-02, NFR-07)
 - D-10: 관리자 API는 `/api/v1/admin/courses` 아래에 두고(등록 `POST`, 수정 `PUT`, 종료 `POST .../close`), 목록·상세 조회는 임직원 API를 같이 쓴다. 과정을 종료하면 모집 중인 회차도 함께 종료된다. 종료된 과정·회차는 수정하거나 회차를 추가할 수 없고 다시 열 수 없다(409 ProblemDetail). 이미 종료된 것을 다시 종료해도 오류가 아니다. 회차 정원은 1~1000명이다. ADMIN 권한 검사(D-04)는 인증을 붙일 때 `/api/v1/admin/**` 경로 규칙으로 걸고, 그 전까지 관리 화면은 course-mfe의 '과정 관리' 탭으로 누구나 열 수 있다 (FR-03, NFR-03)
+- D-11: Claude Code 팀 권한은 `.claude/settings.json`으로 공유한다 (JSON이라 주석을 달 수 없어 근거는 여기에 둔다).
+  - allow: 테스트·검사·포맷·빌드(`./gradlew test|check|spotlessApply|spotlessCheck|build`, `npm test`, `npm run test|typecheck|build`)와 읽기 전용 git(`status`, `diff`, `log`, `show`)
+  - ask: `git push`, `npm install`, `docker`, `psql`
+  - deny: `.env`와 `.env.*`의 읽기·수정(하위 폴더와 워크트리 사본 포함, `.env.example`은 `!` 예외로 허용), `~/.ssh`, 강제 푸시(`--force`, `-f`가 어느 위치에 있든), `main` 직접 푸시, DB 볼륨 삭제(`docker compose down -v`, `docker volume rm`)
+  - Windows에서는 Bash 규칙이 PowerShell 도구에 적용되지 않으므로 같은 규칙을 `PowerShell(...)`로도 둔다 (Gradle은 `.\gradlew`)
+  - 개인 설정(기본 모드, 로컬 서버 명령)은 `.claude/settings.local.json`, 워크트리(`.claude/worktrees/`)와 개인 경로가 들어가는 `.claude/launch.json`은 커밋하지 않는다
+  - 회사 공통 금지(bypass 모드 금지 등)는 관리 설정 몫이며 이 저장소에서 정하지 않는다 (NFR-03)
