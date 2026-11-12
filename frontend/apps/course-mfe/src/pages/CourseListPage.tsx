@@ -5,6 +5,7 @@ import {
   Chip,
   CircularProgress,
   InputAdornment,
+  Link,
   MenuItem,
   Paper,
   Stack,
@@ -19,24 +20,15 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { CATEGORIES, categoryColor, STATUS } from '../courseLabels';
 import { useCourses } from '../hooks/useCourses';
 
 const PAGE_SIZE = 10;
 
-// 분류 목록 API가 생기기 전까지는 화면에 고정한다 (D-08)
-const CATEGORIES = ['개발', '데이터', '리더십', '공통'];
-
-const CATEGORY_COLORS: Record<string, { bg: string; fg: string }> = {
-  개발: { bg: '#EEF2FF', fg: '#4338CA' },
-  데이터: { bg: '#ECFEFF', fg: '#0E7490' },
-  리더십: { bg: '#FFF7ED', fg: '#C2410C' },
-  공통: { bg: '#F3F4F6', fg: '#374151' },
-};
-
-const STATUS: Record<string, { label: string; color: 'success' | 'default' }> = {
-  OPEN: { label: '모집 중', color: 'success' },
-  CLOSED: { label: '종료', color: 'default' },
-};
+interface CourseListPageProps {
+  /** 과정을 고르면 부른다 (상세 화면으로 이동, FR-02) */
+  onSelect?: (courseId: number) => void;
+}
 
 function SearchIcon() {
   return (
@@ -47,7 +39,7 @@ function SearchIcon() {
 }
 
 /** 과정 목록 화면 (FR-01). 데이터는 useCourses로만 가져오고 courseApi를 직접 부르지 않는다. */
-export function CourseListPage() {
+export function CourseListPage({ onSelect }: CourseListPageProps) {
   const [keyword, setKeyword] = useState('');
   const [category, setCategory] = useState('');
   const [page, setPage] = useState(0); // MUI TablePagination도 0부터 시작
@@ -131,11 +123,30 @@ export function CourseListPage() {
             <TableBody>
               {courses.map((c) => {
                 const status = c.status ? STATUS[c.status] : undefined;
-                const color = (c.category && CATEGORY_COLORS[c.category]) || CATEGORY_COLORS['공통'];
+                const color = categoryColor(c.category);
+                const select = () => c.id !== undefined && onSelect?.(c.id);
                 return (
-                  <TableRow key={c.id} hover sx={{ '&:last-child td': { borderBottom: 0 } }}>
+                  <TableRow
+                    key={c.id}
+                    hover
+                    onClick={select}
+                    sx={{ cursor: onSelect ? 'pointer' : undefined, '&:last-child td': { borderBottom: 0 } }}
+                  >
                     <TableCell>
-                      <Typography fontWeight={600}>{c.title}</Typography>
+                      {/* 키보드·스크린리더 사용자를 위해 제목은 버튼으로도 누를 수 있게 한다 */}
+                      <Link
+                        component="button"
+                        type="button"
+                        underline="hover"
+                        color="text.primary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          select();
+                        }}
+                        sx={{ fontWeight: 600, fontSize: 16, textAlign: 'left' }}
+                      >
+                        {c.title}
+                      </Link>
                     </TableCell>
                     <TableCell>
                       <Chip

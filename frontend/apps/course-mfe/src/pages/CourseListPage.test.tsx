@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { useCourses } from '../hooks/useCourses';
 import { CourseListPage } from './CourseListPage';
 
@@ -23,6 +23,26 @@ test('과정 목록을 표로 보여 준다', () => {
   expect(screen.getByText('JPA 기초')).toBeInTheDocument();
   expect(screen.getByRole('cell', { name: '개발' })).toBeInTheDocument();
   expect(screen.getByText('모집 중')).toBeInTheDocument();
+});
+
+test('과정명을 누르면 onSelect에 과정 id를 넘긴다', () => {
+  mockUseCourses.mockReturnValue({
+    data: {
+      content: [{ id: 7, title: 'JPA 기초', category: '개발', status: 'OPEN', sessionCount: 2 }],
+      page: 0,
+      size: 10,
+      totalElements: 1,
+    },
+    loading: false,
+    error: undefined,
+  });
+  const onSelect = jest.fn();
+
+  render(<CourseListPage onSelect={onSelect} />);
+  fireEvent.click(screen.getByRole('button', { name: 'JPA 기초' }));
+
+  expect(onSelect).toHaveBeenCalledTimes(1);
+  expect(onSelect).toHaveBeenCalledWith(7);
 });
 
 test('불러오기에 실패하면 에러 메시지를 보여 준다', () => {
