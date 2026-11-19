@@ -16,7 +16,11 @@ project_dir="${project_dir//\\//}"
 
 case "$file_path" in
   *.java)
-    backend="$project_dir/backend"
+    # 수정한 파일이 속한 backend 폴더 (worktree에서도 동작). 아니면 프로젝트의 backend
+    case "$file_path" in
+      */backend/*) backend="${file_path%%/backend/*}/backend" ;;
+      *)           backend="$project_dir/backend" ;;
+    esac
     if [ -x "$backend/gradlew" ] || [ -f "$backend/gradlew" ]; then
       (cd "$backend" && ./gradlew spotlessApply -q) >/dev/null 2>&1 || true
     fi
